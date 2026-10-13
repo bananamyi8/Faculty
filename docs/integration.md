@@ -28,8 +28,6 @@ Each piece of shared data has one owner module. Other modules should retrieve au
 | Department records | Faculty | `departmentId`, e.g. `DEPT-001` — proposed |
 | Fees, balances, and payments | Finance | ID format pending agreement |
 | Books and loans | Library | ID format pending agreement |
-| Clinic visits and health clearances | Clinic | ID format pending agreement |
-| Supplies and equipment | Inventory | ID format pending agreement |
 
 ### Sensitive data
 
