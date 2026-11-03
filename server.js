@@ -4,6 +4,13 @@ const path = require("node:path");
 const yaml = require("js-yaml");
 const swaggerUi = require("swagger-ui-express");
 
+require('dotenv').config();
+const connectDB = require('./server/db');
+
+connectDB().then(() => {
+  app.listen(process.env.PORT || 5000, () => console.log('API running'));
+}).catch(err => { console.error(err); process.exit(1); });
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -20,6 +27,8 @@ app.get("/api/v1/health", (req, res) => {
 });
 
 app.use("/api/v1/faculty", require("./server/routes/facultyRoutes"));
+app.use('/api/v1/departments', require('./server/routes/departments'));
+app.use('/api/v1/faculty', require('./server/routes/faculty'));
 
 // Return Problem Details JSON for unknown routes.
 app.use((req, res) => {
