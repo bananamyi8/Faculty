@@ -1,21 +1,19 @@
 function validateFaculty(data) {
   const errors = [];
 
-  if (!data.name || !data.name.trim()) {
+  if (typeof data.name !== "string" || !data.name.trim()) {
     errors.push("Name is required.");
   }
-
-  if (!data.department || !data.department.trim()) {
+  if (typeof data.department !== "string" || !data.department.trim()) {
     errors.push("Department is required.");
   }
-
-  if (!data.position || !data.position.trim()) {
+  if (typeof data.position !== "string" || !data.position.trim()) {
     errors.push("Position is required.");
   }
-
-  if (!data.email || !data.email.trim()) {
-    errors.push("Email is required.");
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim())) {
+  if (
+    typeof data.email !== "string" ||
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim())
+  ) {
     errors.push("A valid email address is required.");
   }
 
