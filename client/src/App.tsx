@@ -1,4 +1,7 @@
 import { useMemo, useState, type FormEvent, type ReactNode } from "react"
+// @ts-expect-error config/api.js has no declaration file.
+import api from "../config/api";
+import { useEffect } from "react";
 
 type Page = "login" | "dashboard" | "faculty" | "add-faculty" | "profile" | "non-faculty" | "add-non-faculty" | "edit-non-faculty" | "non-faculty-profile" | "departments" | "subjects" | "schedules" | "reports" | "settings"
 
@@ -2625,6 +2628,15 @@ function Settings({
 }
 
 export default function App() {
+  useEffect(() => {
+    api.get("/faculty")
+      .then((response: { data: any; }) => {
+        console.log("Faculty Data:", response.data);
+      })
+      .catch((error: any) => {
+        console.error("Failed to fetch faculty:", error);
+      });
+  }, []);
   const [page, setPage] = useState<Page>("dashboard")
   const [toast, setToast] = useState("")
   const [nonFacultyRecords, setNonFacultyRecords] = useState(
