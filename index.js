@@ -37,6 +37,8 @@ const openApiDocument = yaml.load(
     fs.readFileSync(openApiPath, "utf8")
 );
 
+
+
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(openApiDocument));
 
 app.get("/", (req, res) => {
