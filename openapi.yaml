@@ -1,9 +1,10 @@
+
 openapi: 3.0.3
 
 info:
   title: Faculty Module API
   version: 1.0.0
-  description: REST API for managing faculty and department records using mock data.
+  description: REST API for managing faculty and department records.
 
 servers:
   - url: http://localhost:5000/api/v1
@@ -19,7 +20,7 @@ paths:
     get:
       tags:
         - Health
-      summary: Health check endpoint
+      summary: Check API status
       operationId: getHealth
       responses:
         "200":
@@ -31,11 +32,6 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: ok
-
-  # =========================
-  # DEPARTMENT ENDPOINTS
-  # =========================
 
   /departments:
     get:
@@ -45,18 +41,14 @@ paths:
       operationId: getDepartments
       responses:
         "200":
-          description: Department list returned successfully
+          description: Departments retrieved successfully
           content:
             application/json:
               schema:
                 type: object
-                required:
-                  - count
-                  - data
                 properties:
                   count:
                     type: integer
-                    example: 3
                   data:
                     type: array
                     items:
@@ -73,22 +65,13 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/DepartmentPayload"
-            example:
-              department_name: Engineering
-              description: Department for engineering programs
       responses:
         "201":
           description: Department created successfully
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Department created successfully.
-                  data:
-                    $ref: "#/components/schemas/Department"
+                $ref: "#/components/schemas/Department"
         "400":
           $ref: "#/components/responses/BadRequest"
         "409":
@@ -99,35 +82,28 @@ paths:
       - name: departmentId
         in: path
         required: true
-        description: Unique department ID
         schema:
-          type: integer
-          minimum: 1
+          type: string
 
     get:
       tags:
         - Department
-      summary: Get a department by ID
+      summary: Get department by ID
       operationId: getDepartmentById
       responses:
         "200":
-          description: Department found
+          description: Department retrieved successfully
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    $ref: "#/components/schemas/Department"
-        "400":
-          $ref: "#/components/responses/BadRequest"
+                $ref: "#/components/schemas/Department"
         "404":
           $ref: "#/components/responses/NotFound"
 
     put:
       tags:
         - Department
-      summary: Update a department
+      summary: Update department
       operationId: updateDepartment
       requestBody:
         required: true
@@ -141,33 +117,19 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Department updated successfully.
-                  data:
-                    $ref: "#/components/schemas/Department"
-        "400":
-          $ref: "#/components/responses/BadRequest"
+                $ref: "#/components/schemas/Department"
         "404":
           $ref: "#/components/responses/NotFound"
-        "409":
-          $ref: "#/components/responses/Conflict"
-
-  # =========================
-  # FACULTY ENDPOINTS
-  # =========================
 
   /faculty:
     get:
       tags:
         - Faculty
-      summary: Get all faculty
+      summary: Get all faculty members
       operationId: getFaculty
       responses:
         "200":
-          description: Faculty list returned successfully
+          description: Faculty records retrieved successfully
           content:
             application/json:
               schema:
@@ -178,7 +140,7 @@ paths:
     post:
       tags:
         - Faculty
-      summary: Create faculty
+      summary: Create a faculty member
       operationId: createFaculty
       requestBody:
         required: true
@@ -186,11 +148,6 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/FacultyPayload"
-            example:
-              name: Beatriz Cruz
-              department_id: 1
-              position: Instructor
-              email: beatriz.cruz@example.com
       responses:
         "201":
           description: Faculty created successfully
@@ -201,11 +158,7 @@ paths:
         "400":
           $ref: "#/components/responses/BadRequest"
         "404":
-          description: The specified department does not exist
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ProblemDetails"
+          description: Department not found
         "409":
           $ref: "#/components/responses/Conflict"
 
@@ -214,10 +167,8 @@ paths:
       - name: facultyId
         in: path
         required: true
-        description: Unique faculty ID
         schema:
-          type: integer
-          minimum: 1
+          type: string
 
     get:
       tags:
@@ -226,13 +177,11 @@ paths:
       operationId: getFacultyById
       responses:
         "200":
-          description: Faculty found
+          description: Faculty retrieved successfully
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Faculty"
-        "400":
-          $ref: "#/components/responses/BadRequest"
         "404":
           $ref: "#/components/responses/NotFound"
 
@@ -247,11 +196,6 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/FacultyPayload"
-            example:
-              name: Beatriz Cruz
-              department_id: 2
-              position: Senior Instructor
-              email: beatriz.cruz@example.com
       responses:
         "200":
           description: Faculty updated successfully
@@ -259,26 +203,16 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Faculty"
-        "400":
-          $ref: "#/components/responses/BadRequest"
         "404":
-          description: Faculty member or department not found
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ProblemDetails"
-        "409":
-          $ref: "#/components/responses/Conflict"
+          $ref: "#/components/responses/NotFound"
 
   /faculty/{facultyId}/disable:
     parameters:
       - name: facultyId
         in: path
         required: true
-        description: Unique faculty ID
         schema:
-          type: integer
-          minimum: 1
+          type: string
 
     patch:
       tags:
@@ -292,14 +226,11 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Faculty"
-        "400":
-          $ref: "#/components/responses/BadRequest"
         "404":
           $ref: "#/components/responses/NotFound"
 
 components:
   schemas:
-    # Department request body
     DepartmentPayload:
       type: object
       required:
@@ -307,32 +238,20 @@ components:
       properties:
         department_name:
           type: string
-          maxLength: 100
-          example: Information Technology
         description:
           type: string
-          example: Department for IT and software development programs
 
-    # Department response
     Department:
-      type: object
-      required:
-        - department_id
-        - department_name
-        - description
-      properties:
-        department_id:
-          type: integer
-          example: 1
-        department_name:
-          type: string
-          maxLength: 100
-          example: Information Technology
-        description:
-          type: string
-          example: Department for IT and software development programs
+      allOf:
+        - $ref: "#/components/schemas/DepartmentPayload"
+        - type: object
+          properties:
+            _id:
+              type: string
+            createdAt:
+              type: string
+              format: date-time
 
-    # Faculty request body
     FacultyPayload:
       type: object
       required:
@@ -343,86 +262,54 @@ components:
       properties:
         name:
           type: string
-          example: Maria Santos
         department_id:
-          type: integer
-          minimum: 1
-          description: ID of the department this faculty member belongs to
-          example: 1
+          type: string
         position:
           type: string
-          example: Instructor
         email:
           type: string
           format: email
-          example: maria.santos@example.com
 
-    # Faculty response
     Faculty:
       allOf:
         - $ref: "#/components/schemas/FacultyPayload"
         - type: object
-          required:
-            - facultyId
-            - status
-            - department
           properties:
-            facultyId:
-              type: integer
-              example: 1
+            _id:
+              type: string
             status:
               type: string
               enum:
                 - ACTIVE
                 - INACTIVE
-              example: ACTIVE
-            department:
-              $ref: "#/components/schemas/Department"
+            createdAt:
+              type: string
+              format: date-time
 
-    # Standard error response
-    ProblemDetails:
+    Error:
       type: object
-      required:
-        - type
-        - title
-        - status
-        - detail
-        - instance
       properties:
-        type:
+        message:
           type: string
-          example: about:blank
-        title:
-          type: string
-          example: Not Found
-        status:
-          type: integer
-          example: 404
-        detail:
-          type: string
-          example: Department ID 999 was not found.
-        instance:
-          type: string
-          example: /api/v1/departments/999
 
   responses:
     BadRequest:
       description: Invalid request
       content:
-        application/problem+json:
+        application/json:
           schema:
-            $ref: "#/components/schemas/ProblemDetails"
+            $ref: "#/components/schemas/Error"
 
     NotFound:
-      description: Requested resource not found
+      description: Resource not found
       content:
-        application/problem+json:
+        application/json:
           schema:
-            $ref: "#/components/schemas/ProblemDetails"
+            $ref: "#/components/schemas/Error"
 
     Conflict:
-      description: Duplicate department name or faculty email
+      description: Duplicate record
       content:
-        application/problem+json:
+        application/json:
           schema:
-            $ref: "#/components/schemas/ProblemDetails"
+            $ref: "#/components/schemas/Error"

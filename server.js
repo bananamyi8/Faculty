@@ -21,6 +21,10 @@ const openapiPath = path.join(__dirname, "server", "openapi.yaml");
 const openapiDocument = yaml.load(fs.readFileSync(openapiPath, "utf8"));
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(openapiDocument));
 
+const nonFacultyRoutes = require("./routes/nonFacultyRoutes");
+
+app.use("/api/non-faculty", nonFacultyRoutes);
+
 // Health endpoint required by the project brief.
 app.get("/api/v1/health", (req, res) => {
   res.status(200).json({ status: "ok" });

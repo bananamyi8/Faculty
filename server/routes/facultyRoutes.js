@@ -1,59 +1,81 @@
-const express = require("express");
-const service = require("../services/facultyService");
+const router = require('express').Router();
+const mongoose = require('mongoose');
+const Faculty = require('../models/Faculty');
+const Department = require('../models/Department');
 
-const router = express.Router();
+const wrap = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+const populate = { path: 'department', select: 'name description' };
 
-function handleError(err, res, next) {
-  if (err instanceof service.ApiError) {
-    return res.status(err.status).type("application/problem+json").json({
-      type: "about:blank",
-      title: err.title,
-      status: err.status,
-      detail: err.message
-    });
-  }
-  return next(err);
+async function validate(body) {
+  const errors = {};
+  if (!body.fullName || !String(body.fullName).trim()) errors.fullName = 'Full name is required';
+  if (!body.position || !String(body.position).trim()) errors.position = 'Position is required';
+  if (!body.email || !String(body.email).trim()) errors.email = 'Email is required';
+  else if (!/^\S+@\S+\.\S+$/.test(body.email)) errors.email = 'Enter a valid email address';
+  if (!body.department) errors.department = 'Department is required';
+  else if (!mongoose.isValidObjectId(body.department) || !(await Department.exists({ _id: body.department })))
+    errors.department = 'Selected department does not exist';
+  return errors;
 }
 
-router.get("/", (req, res, next) => {
-  try {
-    res.status(200).json(service.getAll());
-  } catch (err) {
-    handleError(err, res, next);
-  }
-});
+function checkId(req, res, next) {
+  if (!mongoose.isValidObjectId(req.params.facultyId))
+    return res.status(400).json({ message: 'Invalid faculty ID' });
+  next();
+}
 
-router.post("/", (req, res, next) => {
-  try {
-    const created = service.create(req.body);
-    res.status(201).json(created);
-  } catch (err) {
-    handleError(err, res, next);
-  }
-});
+// GET /api/v1/faculty
+router.get('/', wrap(async (req, res) => {
+  res.json(await Faculty.find().populate(populate).sort('fullName'));
+}));
 
-router.get("/:facultyId", (req, res, next) => {
-  try {
-    res.status(200).json(service.getById(req.params.facultyId));
-  } catch (err) {
-    handleError(err, res, next);
-  }
-});
+// GET /api/v1/faculty/:facultyId
+router.get('/:facultyId', checkId, wrap(async (req, res) => {
+  const f = await Faculty.findById(req.params.facultyId).populate(populate);
+  if (!f) return res.status(404).json({ message: 'Faculty member not found' });
+  res.json(f);
+}));
 
-router.put("/:facultyId", (req, res, next) => {
-  try {
-    res.status(200).json(service.update(req.params.facultyId, req.body));
-  } catch (err) {
-    handleError(err, res, next);
-  }
-});
+// POST /api/v1/faculty
+router.post('/', wrap(async (req, res) => {
+  const errors = await validate(req.body);
+  if (Object.keys(errors).length) return res.status(400).json({ message: 'Validation failed', errors });
+  const created = await Faculty.create({
+    fullName: req.body.fullName,
+    department: req.body.department,
+    position: req.body.position,
+    email: req.body.email,
+  });
+  res.status(201).json(await created.populate(populate));
+}));
 
-router.patch("/:facultyId/disable", (req, res, next) => {
-  try {
-    res.status(200).json(service.disable(req.params.facultyId));
-  } catch (err) {
-    handleError(err, res, next);
-  }
-});
+// PUT /api/v1/faculty/:facultyId
+router.put('/:facultyId', checkId, wrap(async (req, res) => {
+  const errors = await validate(req.body);
+  if (Object.keys(errors).length) return res.status(400).json({ message: 'Validation failed', errors });
+  const f = await Faculty.findByIdAndUpdate(
+    req.params.facultyId,
+    {
+      fullName: req.body.fullName,
+      department: req.body.department,
+      position: req.body.position,
+      email: req.body.email,
+    },
+    { new: true, runValidators: true }
+  ).populate(populate);
+  if (!f) return res.status(404).json({ message: 'Faculty member not found' });
+  res.json(f);
+}));
+
+// PATCH /api/v1/faculty/:facultyId/disable
+router.patch('/:facultyId/disable', checkId, wrap(async (req, res) => {
+  const f = await Faculty.findByIdAndUpdate(
+    req.params.facultyId,
+    { status: 'INACTIVE' },
+    { new: true }
+  ).populate(populate);
+  if (!f) return res.status(404).json({ message: 'Faculty member not found' });
+  res.json(f);
+}));
 
 module.exports = router;

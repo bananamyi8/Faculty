@@ -137,3 +137,38 @@ Do not mark a proposal as an agreement until both groups have confirmed it.
 - [ ] Confirm the authentication and authorization approach for protected Faculty operations.
 - [ ] Verify error response formats and API health-check behavior.
 - [ ] Replace proposed integration endpoints with the actual endpoints once the other modules publish their API contracts.
+
+# Faculty Module API Integration
+
+## API Information
+
+Base URL:
+http://localhost:5000/api/v1
+
+Documentation:
+http://localhost:5000/docs
+
+## Health Check
+
+GET /health
+
+## Faculty Endpoints
+
+GET /faculty
+GET /faculty/:id
+POST /faculty
+PUT /faculty/:id
+PATCH /faculty/:id/disable
+
+## Department Endpoints
+
+GET /departments
+POST /departments
+
+## Database
+
+MongoDB
+
+## Backend Technology
+
+Node.js + Express
