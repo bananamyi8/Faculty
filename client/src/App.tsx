@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode, type FormEvent } from "react"
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode, type FormEvent } from "react"
 import api from "./services/api";
 
 type Page =
@@ -12,6 +12,7 @@ type Page =
   | "schedules"
   | "reports"
   | "settings"
+  |  "users"
 
 type Faculty = {
   facultyId: number
@@ -320,22 +321,30 @@ function Badge({
 
 function ActionButtons({
   onView,
+  onEdit,
   onDelete,
 }: {
   onView?: () => void
+  onEdit?: () => void
   onDelete?: () => void
 }) {
   return (
     <div className="actions">
-      <button aria-label="View" onClick={onView}>
-        <Icon name="eye" size={16} />
-      </button>
-      <button aria-label="Edit">
-        <Icon name="edit" size={16} />
-      </button>
-      <button aria-label="Delete" className="delete" onClick={onDelete}>
-        <Icon name="trash" size={16} />
-      </button>
+      {onView && (
+        <button aria-label="View" onClick={onView}>
+          <Icon name="eye" size={16} />
+        </button>
+      )}
+      {onEdit && (
+        <button aria-label="Edit" onClick={onEdit}>
+          <Icon name="edit" size={16} />
+        </button>
+      )}
+      {onDelete && (
+        <button aria-label="Delete" className="delete" onClick={onDelete}>
+          <Icon name="trash" size={16} />
+        </button>
+      )}
     </div>
   )
 }
@@ -375,7 +384,9 @@ const navItems: { page: Page; label: string; icon: string }[] = [
   { page: "subjects", label: "Subjects", icon: "subject" },
   { page: "schedules", label: "Class Schedules", icon: "calendar" },
   { page: "reports", label: "Reports", icon: "report" },
+  { page: "users", label: "Users", icon: "staff" },
   { page: "settings", label: "Settings", icon: "settings" },
+  
 ]
 
 const surfaceSidebarPages = new Set<Page>([
@@ -389,23 +400,15 @@ const surfaceSidebarPages = new Set<Page>([
   "settings",
 ])
 
-
-function Shell({
-  page,
-  setPage,
-  children,
-}: {
-  page: Page
-  setPage: (page: Page) => void
-  children: ReactNode
-}) {
+function Shell({ page, setPage, onLogout, children }: { page: Page; setPage: (page: Page) => void; onLogout: () => void; children: ReactNode }) {
+  const { user } = useAuth()
   const [open, setOpen] = useState(false)
   return (
     <div className="app-shell">
       <aside className={`sidebar ${open ? "open" : ""}`}>
         <Logo light className="sidebar-logo" title="Infotech Development System Colleges" subtitle="FACULTY MANAGEMENT" />
         <nav>
-          {navItems.map((item) => (
+          {navItems.filter((item) => canAccess(item.page, user.role)).map((item) => (
             <button key={item.page} onClick={() => { setPage(item.page); setOpen(false) }} className={page === item.page || (page === "add-faculty" || page === "profile") && item.page === "faculty" ? "active" : ""}>
               <Icon name={item.icon} className={item.page === "dashboard" ? "sidebar-icon-fill" : surfaceSidebarPages.has(item.page) ? "sidebar-icon-stroke" : ""} />
               <span className={surfaceSidebarPages.has(item.page) ? "sidebar-surface-text" : ""}>{item.label}</span>
@@ -419,7 +422,10 @@ function Shell({
         <header className="topbar">
           <button className="menu-btn" aria-label="Open menu" onClick={() => setOpen(true)}><Icon name="menu" /></button>
           <div className="global-search"><Icon name="database" size={17} /><span>Faculty Management System</span></div>
-          <div className="top-actions"><span className="badge badge-green">API workspace</span></div>
+          <div className="top-actions">
+            <span className="badge badge-green">{user.name} · {user.role}</span>
+            <Button variant="secondary" onClick={onLogout}>Log out</Button>
+          </div>
         </header>
         <main className="content">{children}</main>
       </div>
@@ -442,6 +448,23 @@ function EmptyState({ message }: { message: string }) {
 function apiError(error: any): string {
   return error?.response?.data?.detail || error?.response?.data?.message || error?.message || "The API request failed. Check that the backend and MongoDB are running."
 }
+
+type Role = "admin" | "staff" | "faculty"
+type User = { id: string; name: string; email: string; role: Role }
+
+const AuthCtx = createContext<{ user: User; canEdit: boolean } | null>(null)
+function useAuth() {
+  const ctx = useContext(AuthCtx)
+  if (!ctx) throw new Error("useAuth must be used inside the logged-in app")
+  return ctx
+}
+
+function canAccess(page: Page, role: Role) {
+  if (page === "users") return role === "admin"
+  if (page === "reports" || page === "add-faculty") return role !== "faculty"
+  return true
+}
+
 
 function Dashboard({ go }: { go: (page: Page) => void }) {
   const [faculty, setFaculty] = useState<Faculty[]>([])
@@ -489,6 +512,7 @@ function FacultyPage({ go, notify, onSelect, onAdd }: { go: (page: Page) => void
   const [error, setError] = useState("")
   const [query, setQuery] = useState("")
   const [busyId, setBusyId] = useState<number | null>(null)
+  const { canEdit } = useAuth()
   async function load() {
     setLoading(true); setError("")
     try { const response = await api.get<Faculty[]>("/faculty"); setFaculty(Array.isArray(response.data) ? response.data : []) }
@@ -505,7 +529,7 @@ function FacultyPage({ go, notify, onSelect, onAdd }: { go: (page: Page) => void
   }
   const rows = useMemo(() => faculty.filter((f) => `${f.facultyId} ${f.name} ${f.email} ${f.department} ${f.position}`.toLowerCase().includes(query.toLowerCase())), [faculty, query])
   return <div>
-    <PageTitle title="Faculty Management" subtitle="Faculty records loaded directly from your MongoDB-backed API." action={<Button icon="plus" onClick={onAdd}>Add faculty</Button>} />
+    <PageTitle title="Faculty Management" subtitle="Faculty records loaded directly from your MongoDB-backed API." action={canEdit ? <Button icon="plus" onClick={onAdd}>Add faculty</Button> : undefined}/>
     <section className="card table-card"><div className="staff-toolbar"><input aria-label="Search faculty" placeholder="Search faculty records..." value={query} onChange={(e) => setQuery(e.target.value)} /></div>
       {loading ? <LoadingState text="Loading faculty records..." /> : error ? <ErrorState error={error} retry={() => void load()} /> : rows.length === 0 ? <EmptyState message={query ? "No faculty records match your search." : "No faculty records exist in MongoDB. Use Add faculty to create the first record."} /> : <div className="table-scroll"><table><thead><tr><th>Faculty ID</th><th>Name</th><th>Department</th><th>Position</th><th>Email</th><th>Status</th><th>Actions</th></tr></thead><tbody>{rows.map((person) => <tr key={person.facultyId}><td>{person.facultyId}</td><td><strong>{person.name}</strong></td><td>{person.department}</td><td>{person.position}</td><td>{person.email}</td><td><Badge tone={person.status === "ACTIVE" ? "green" : "gray"}>{person.status}</Badge></td><td className="row-actions"><Button className="small" variant="secondary" onClick={() => { onSelect(person.facultyId); go("profile") }}>View</Button><Button className="small" variant="secondary" onClick={() => { onSelect(person.facultyId); go("add-faculty") }}>Edit</Button>{person.status === "ACTIVE" && <Button className="small" variant="danger" onClick={() => void deactivate(person.facultyId)}>{busyId === person.facultyId ? "Saving..." : "Deactivate"}</Button>}</td></tr>)}</tbody></table></div>}
     </section>
@@ -615,30 +639,305 @@ function Departments({ notify }: { notify: (message: string) => void }) {
   </div>
 }
 
-function UnsupportedModule({ title, description }: { title: string; description: string }) {
-  return <div><PageTitle title={title} subtitle={description} /><EmptyState message={`No ${title.toLowerCase()} are displayed because this backend does not currently provide an API endpoint for this module. No sample or hard-coded records are being shown.`} /></div>
+type Row = Record<string, any>
+
+type FieldDef = {
+  name: string
+  label: string
+  type?: "text" | "email" | "number" | "time" | "select"
+  required?: boolean
+  options?: string[]
+  optionsFrom?: "departments" | "faculty" | "subjects"
+}
+
+type ColumnDef = { key: string; label: string }
+
+const nonFacultyFields: FieldDef[] = [
+  { name: "employeeId", label: "Employee ID", required: true },
+  { name: "name", label: "Full name", required: true },
+  { name: "department", label: "Department", type: "select", optionsFrom: "departments", required: true },
+  { name: "position", label: "Position", required: true },
+  { name: "email", label: "Email address", type: "email" },
+  { name: "status", label: "Status", type: "select", options: ["ACTIVE", "INACTIVE"], required: true },
+]
+const nonFacultyColumns: ColumnDef[] = [
+  { key: "nonFacultyId", label: "ID" }, { key: "employeeId", label: "Employee ID" }, { key: "name", label: "Name" },
+  { key: "department", label: "Department" }, { key: "position", label: "Position" }, { key: "email", label: "Email" }, { key: "status", label: "Status" },
+]
+
+const subjectFields: FieldDef[] = [
+  { name: "code", label: "Subject code", required: true },
+  { name: "name", label: "Subject name", required: true },
+  { name: "department", label: "Department", type: "select", optionsFrom: "departments" },
+  { name: "units", label: "Units", type: "number", required: true },
+]
+const subjectColumns: ColumnDef[] = [
+  { key: "subjectId", label: "ID" }, { key: "code", label: "Code" }, { key: "name", label: "Subject" },
+  { key: "department", label: "Department" }, { key: "units", label: "Units" },
+]
+
+const scheduleFields: FieldDef[] = [
+  { name: "subject", label: "Subject", type: "select", optionsFrom: "subjects", required: true },
+  { name: "faculty", label: "Faculty", type: "select", optionsFrom: "faculty", required: true },
+  { name: "section", label: "Section", required: true },
+  { name: "day", label: "Day", type: "select", options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], required: true },
+  { name: "startTime", label: "Start time", type: "time", required: true },
+  { name: "endTime", label: "End time", type: "time", required: true },
+  { name: "room", label: "Room", required: true },
+]
+const scheduleColumns: ColumnDef[] = [
+  { key: "scheduleId", label: "ID" }, { key: "subject", label: "Subject" }, { key: "faculty", label: "Faculty" },
+  { key: "section", label: "Section" }, { key: "day", label: "Day" }, { key: "startTime", label: "Start" },
+  { key: "endTime", label: "End" }, { key: "room", label: "Room" },
+]
+
+const lookupEndpoint: Record<string, string> = { departments: "/departments", faculty: "/faculty", subjects: "/subjects" }
+
+function CrudModule({ title, subtitle, singular, endpoint, idKey, fields, columns, notify }: {
+  title: string
+  subtitle: string
+  singular: string
+  endpoint: string
+  idKey: string
+  fields: FieldDef[]
+  columns: ColumnDef[]
+  notify: (message: string) => void
+}) {
+  const [rows, setRows] = useState<Row[]>([])
+  const [lookups, setLookups] = useState<Record<string, string[]>>({})
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+  const [formError, setFormError] = useState("")
+  const [showForm, setShowForm] = useState(false)
+  const [editingId, setEditingId] = useState<number | null>(null)
+  const [form, setForm] = useState<Record<string, string>>({})
+  const [saving, setSaving] = useState(false)
+  const [query, setQuery] = useState("")
+
+  const sources = useMemo(
+    () => Array.from(new Set(fields.map((f) => f.optionsFrom).filter(Boolean))) as string[],
+    [fields]
+  )
+
+  async function load() {
+    setLoading(true); setError("")
+    try {
+      const [main, ...extra] = await Promise.all([api.get(endpoint), ...sources.map((s) => api.get(lookupEndpoint[s]))])
+      setRows(Array.isArray(main.data) ? main.data : [])
+      const next: Record<string, string[]> = {}
+      sources.forEach((source, i) => {
+        const data = extra[i].data
+        if (source === "departments") next[source] = (Array.isArray(data?.data) ? data.data : []).map((x: Row) => x.department_name)
+        else if (source === "faculty") next[source] = (Array.isArray(data) ? data : []).map((x: Row) => x.name)
+        else next[source] = (Array.isArray(data) ? data : []).map((x: Row) => `${x.code} - ${x.name}`)
+      })
+      setLookups(next)
+    } catch (err) { setError(apiError(err)) }
+    finally { setLoading(false) }
+  }
+  useEffect(() => { void load() }, [endpoint])
+
+  function optionsFor(field: FieldDef): string[] | undefined {
+    if (field.options) return field.options
+    if (field.optionsFrom) return lookups[field.optionsFrom]
+    return undefined
+  }
+
+  function openAdd() {
+    const initial: Record<string, string> = {}
+    fields.forEach((f) => { const opts = optionsFor(f); initial[f.name] = f.type === "select" && opts && opts.length ? opts[0] : "" })
+    setForm(initial); setEditingId(null); setFormError(""); setShowForm(true)
+  }
+
+  function openEdit(row: Row) {
+    const initial: Record<string, string> = {}
+    fields.forEach((f) => { initial[f.name] = row[f.name] === undefined || row[f.name] === null ? "" : String(row[f.name]) })
+    setForm(initial); setEditingId(row[idKey]); setFormError(""); setShowForm(true)
+  }
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault(); setSaving(true); setFormError("")
+    const payload: Row = {}
+    fields.forEach((f) => { payload[f.name] = f.type === "number" ? Number(form[f.name]) : form[f.name] })
+    try {
+      if (editingId !== null) await api.put(`${endpoint}/${editingId}`, payload)
+      else await api.post(endpoint, payload)
+      notify(`${singular} ${editingId !== null ? "updated" : "saved to MongoDB"}.`)
+      setShowForm(false); setEditingId(null)
+      await load()
+    } catch (err) { setFormError(apiError(err)) }
+    finally { setSaving(false) }
+  }
+
+  async function remove(row: Row) {
+    if (!window.confirm(`Delete this ${singular.toLowerCase()}?`)) return
+    try { await api.delete(`${endpoint}/${row[idKey]}`); notify(`${singular} deleted.`); await load() }
+    catch (err) { notify(apiError(err)) }
+  }
+
+  const filtered = rows.filter((row) => columns.map((c) => String(row[c.key] ?? "")).join(" ").toLowerCase().includes(query.toLowerCase()))
+
+  return <div>
+    <PageTitle title={title} subtitle={subtitle} action={<Button icon="plus" onClick={() => (showForm ? setShowForm(false) : openAdd())}>{showForm ? "Cancel" : `Add ${singular.toLowerCase()}`}</Button>} />
+    {showForm && <form className="card form-card" onSubmit={(e) => void submit(e)}>
+      <div className="form-grid">
+        {fields.map((f) => {
+          const opts = optionsFor(f)
+          const useSelect = f.type === "select" && opts && opts.length > 0
+          return <label className="field" key={f.name}>
+            <span>{f.label}{f.required && <b> *</b>}</span>
+            {useSelect
+              ? <select required={f.required} value={form[f.name] ?? ""} onChange={(e) => setForm((c) => ({ ...c, [f.name]: e.target.value }))}>{opts!.map((o) => <option key={o} value={o}>{o}</option>)}</select>
+              : <input type={f.type === "select" ? "text" : f.type || "text"} min={f.type === "number" ? 1 : undefined} required={f.required} value={form[f.name] ?? ""} onChange={(e) => setForm((c) => ({ ...c, [f.name]: e.target.value }))} />}
+          </label>
+        })}
+      </div>
+      {formError && <p className="form-error" role="alert">{formError}</p>}
+      <div className="form-actions"><Button variant="secondary" onClick={() => setShowForm(false)}>Cancel</Button><Button type="submit" disabled={saving}>{saving ? "Saving..." : editingId !== null ? "Save changes" : `Save ${singular.toLowerCase()}`}</Button></div>
+    </form>}
+    <section className="card table-card">
+      <div className="staff-toolbar"><input aria-label={`Search ${title}`} placeholder={`Search ${title.toLowerCase()}...`} value={query} onChange={(e) => setQuery(e.target.value)} /></div>
+      {loading ? <LoadingState text={`Loading ${title.toLowerCase()}...`} />
+        : error ? <ErrorState error={error} retry={() => void load()} />
+        : filtered.length === 0 ? <EmptyState message={query ? `No ${title.toLowerCase()} match your search.` : `No ${title.toLowerCase()} are stored in MongoDB yet. Use the Add button to create the first record.`} />
+        : <div className="table-scroll"><table>
+          <thead><tr>{columns.map((c) => <th key={c.key}>{c.label}</th>)}<th>Actions</th></tr></thead>
+          <tbody>{filtered.map((row) => <tr key={row[idKey]}>
+            {columns.map((c) => <td key={c.key}>{c.key === "status" ? <Badge tone={row.status === "ACTIVE" ? "green" : "gray"}>{row.status}</Badge> : String(row[c.key] ?? "—")}</td>)}
+            <td><ActionButtons onEdit={() => openEdit(row)} onDelete={() => void remove(row)} /></td>
+          </tr>)}</tbody>
+        </table></div>}
+    </section>
+  </div>
+}
+
+type Breakdown = { label: string; total: number }
+type ReportSummary = {
+  totals: Record<string, number>
+  facultyByDepartment: Breakdown[]
+  nonFacultyByDepartment: Breakdown[]
+  subjectsByDepartment: Breakdown[]
+  schedulesByDay: Breakdown[]
+}
+
+function BreakdownTable({ title, name, rows }: { title: string; name: string; rows: Breakdown[] }) {
+  return <section className="card table-card" style={{ marginTop: 16 }}>
+    <div className="card-heading"><div><h2>{title}</h2></div></div>
+    {rows.length === 0 ? <EmptyState message="Nothing to report yet." /> : <div className="table-scroll"><table>
+      <thead><tr><th>{name}</th><th>Total</th></tr></thead>
+      <tbody>{rows.map((r) => <tr key={r.label}><td><strong>{r.label}</strong></td><td>{r.total}</td></tr>)}</tbody>
+    </table></div>}
+  </section>
 }
 
 function Reports() {
-  const [faculty, setFaculty] = useState<Faculty[]>([])
-  const [departments, setDepartments] = useState<Department[]>([])
+  const [summary, setSummary] = useState<ReportSummary | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   async function load() {
     setLoading(true); setError("")
-    try { const [f, d] = await Promise.all([api.get<Faculty[]>("/faculty"), api.get<{ data: Department[] }>("/departments")]); setFaculty(Array.isArray(f.data) ? f.data : []); setDepartments(Array.isArray(d.data?.data) ? d.data.data : []) }
+    try { const response = await api.get<ReportSummary>("/reports/summary"); setSummary(response.data) }
     catch (err) { setError(apiError(err)) }
     finally { setLoading(false) }
   }
   useEffect(() => { void load() }, [])
-  return <div><PageTitle title="Reports & Analytics" subtitle="Only metrics calculated from actual API records are shown." />{loading ? <LoadingState text="Calculating report from database records..." /> : error ? <ErrorState error={error} retry={() => void load()} /> : <div className="report-grid"><article className="card report-stat"><strong>{faculty.length}</strong><p>Total faculty records</p></article><article className="card report-stat"><strong>{faculty.filter((f) => f.status === "ACTIVE").length}</strong><p>Active faculty</p></article><article className="card report-stat"><strong>{departments.length}</strong><p>Departments</p></article><article className="card report-stat"><strong>{faculty.filter((f) => f.status === "INACTIVE").length}</strong><p>Inactive faculty</p></article></div>}</div>
+  const stats = summary ? [
+    ["Total faculty", summary.totals.faculty], ["Active faculty", summary.totals.facultyActive], ["Inactive faculty", summary.totals.facultyInactive],
+    ["Non-faculty staff", summary.totals.nonFaculty], ["Departments", summary.totals.departments], ["Subjects", summary.totals.subjects],
+    ["Class schedules", summary.totals.schedules],
+  ] : []
+  return <div><PageTitle title="Reports & Analytics" subtitle="Metrics calculated from the records stored in MongoDB." />
+    {loading ? <LoadingState text="Calculating report from database records..." />
+      : error ? <ErrorState error={error} retry={() => void load()} />
+      : summary && <>
+        <div className="report-grid">{stats.map(([label, value]) => <article className="card report-stat" key={label as string}><strong>{value}</strong><p>{label}</p></article>)}</div>
+        <BreakdownTable title="Faculty by department" name="Department" rows={summary.facultyByDepartment} />
+        <BreakdownTable title="Non-faculty by department" name="Department" rows={summary.nonFacultyByDepartment} />
+        <BreakdownTable title="Subjects by department" name="Department" rows={summary.subjectsByDepartment} />
+        <BreakdownTable title="Class schedules by day" name="Day" rows={summary.schedulesByDay} />
+      </>}
+  </div>
 }
 
 function AppSettings() {
-  return <div><PageTitle title="Settings" subtitle="Account settings are not connected to an authentication or user-profile API yet." /><EmptyState message="No user profile, password, or preference data is loaded or saved. Those features require authenticated account endpoints." /></div>
+  const { user } = useAuth()
+  return <div><PageTitle title="Settings" subtitle="Your account details." />
+    <section className="card form-card"><div className="form-grid">
+      <div><strong>Name</strong><p>{user.name}</p></div>
+      <div><strong>Email</strong><p>{user.email}</p></div>
+      <div><strong>Role</strong><p>{user.role}</p></div>
+    </div></section>
+  </div>
 }
 
-export default function App() {
+type UserRow = { _id: string; name: string; email: string; role: Role; isActive: boolean }
+
+function UsersPage({ notify }: { notify: (message: string) => void }) {
+  const { user: me } = useAuth()
+  const [users, setUsers] = useState<UserRow[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+  async function load() {
+    setLoading(true); setError("")
+    try { const response = await api.get<UserRow[]>("/auth/users"); setUsers(Array.isArray(response.data) ? response.data : []) }
+    catch (err) { setError(apiError(err)) }
+    finally { setLoading(false) }
+  }
+  useEffect(() => { void load() }, [])
+  async function changeRole(id: string, role: Role) {
+    try { await api.patch(`/auth/users/${id}/role`, { role }); notify("Role updated."); await load() }
+    catch (err) { notify(apiError(err)) }
+  }
+  return <div><PageTitle title="User Accounts" subtitle="Choose what each person who signed up is allowed to do." />
+    <section className="card table-card">
+      {loading ? <LoadingState text="Loading users..." /> : error ? <ErrorState error={error} retry={() => void load()} /> : users.length === 0 ? <EmptyState message="No user accounts yet." /> :
+        <div className="table-scroll"><table><thead><tr><th>Name</th><th>Email</th><th>Role</th></tr></thead><tbody>
+          {users.map((u) => <tr key={u._id}><td><strong>{u.name}</strong></td><td>{u.email}</td><td>
+            <select value={u.role} disabled={u._id === me.id} onChange={(e) => void changeRole(u._id, e.target.value as Role)}>
+              <option value="admin">admin</option><option value="staff">staff</option><option value="faculty">faculty</option>
+            </select>
+          </td></tr>)}
+        </tbody></table></div>}
+    </section>
+  </div>
+}
+
+function AuthPage({ onAuth }: { onAuth: (user: User) => void }) {
+  const [mode, setMode] = useState<"login" | "signup">("login")
+  const [error, setError] = useState("")
+  const [busy, setBusy] = useState(false)
+
+  async function submit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    const body = Object.fromEntries(new FormData(e.currentTarget))
+    setBusy(true); setError("")
+    try {
+      const { data } = await api.post<{ token: string; user: User }>(mode === "login" ? "/auth/login" : "/auth/register", body)
+      localStorage.setItem("token", data.token)
+      onAuth(data.user)
+    } catch (err) { setError(apiError(err)) }
+    finally { setBusy(false) }
+  }
+
+  return <div style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 16 }}>
+    <form className="card form-card" onSubmit={(e) => void submit(e)} style={{ width: "100%", maxWidth: 400, display: "grid", gap: 16 }}>
+      <h2>{mode === "login" ? "Log in" : "Create account"}</h2>
+      <p style={{ fontSize: 12 }}>Faculty Management System</p>
+      {mode === "signup" && <Field label="Full name" name="name" required />}
+      <Field label="Email" name="email" type="email" required />
+      <Field label="Password" name="password" type="password" required />
+      {mode === "signup" && <SelectField label="Role" name="role" options={["faculty", "staff"]} />}
+      {error && <p className="form-error" role="alert">{error}</p>}
+      <Button type="submit" disabled={busy}>{busy ? "Please wait..." : mode === "login" ? "Log in" : "Sign up"}</Button>
+      <Button variant="ghost" onClick={() => { setMode(mode === "login" ? "signup" : "login"); setError("") }}>
+        {mode === "login" ? "No account? Sign up" : "Already have an account? Log in"}
+      </Button>
+    </form>
+  </div>
+}
+
+function AppInner({ onLogout }: { onLogout: () => void }) {
+  const { user } = useAuth()
   const [page, setPage] = useState<Page>("dashboard")
   const [toast, setToast] = useState("")
   const [selectedFacultyId, setSelectedFacultyId] = useState<number | null>(null)
@@ -653,12 +952,33 @@ export default function App() {
     case "add-faculty": content = <FacultyForm go={setPage} notify={notify} facultyId={selectedFacultyId} />; break
     case "profile": content = <FacultyProfile facultyId={selectedFacultyId} go={setPage} />; break
     case "departments": content = <Departments notify={notify} />; break
-    case "non-faculty": content = <UnsupportedModule title="Non-Faculty" description="Non-teaching personnel records are not yet supported by the current API." />; break
-    case "subjects": content = <UnsupportedModule title="Subjects" description="Subject records are not yet supported by the current API." />; break
-    case "schedules": content = <UnsupportedModule title="Class Schedules" description="Class schedule records are not yet supported by the current API." />; break
+    case "non-faculty": content = <CrudModule title="Non-Faculty" subtitle="Non-teaching personnel records stored in MongoDB." singular="Non-faculty record" endpoint="/non-faculty" idKey="nonFacultyId" fields={nonFacultyFields} columns={nonFacultyColumns} notify={notify} />; break
+    case "subjects": content = <CrudModule title="Subjects" subtitle="Subject records stored in MongoDB." singular="Subject" endpoint="/subjects" idKey="subjectId" fields={subjectFields} columns={subjectColumns} notify={notify} />; break
+    case "schedules": content = <CrudModule title="Class Schedules" subtitle="Class schedules stored in MongoDB." singular="Schedule" endpoint="/schedules" idKey="scheduleId" fields={scheduleFields} columns={scheduleColumns} notify={notify} />; break
     case "reports": content = <Reports />; break
     case "settings": content = <AppSettings />; break
+    case "users": content = <UsersPage notify={notify} />; break
     default: content = <Dashboard go={(next) => { if (next === "add-faculty") setSelectedFacultyId(null); setPage(next) }} />
   }
-  return <Shell page={page} setPage={setPage}>{content}{toast && <div className="toast" role="status"><span><Icon name="check" size={15} /></span>{toast}</div>}</Shell>
+    if (!canAccess(page, user.role)) content = <EmptyState message="You do not have permission to view this page." />
+  return <Shell page={page} setPage={setPage} onLogout={onLogout}>{content}{toast && <div className="toast" role="status"><span><Icon name="check" size={15} /></span>{toast}</div>}</Shell>
+}
+
+export default function App() {
+  const [user, setUser] = useState<User | null>(null)
+  const [checking, setChecking] = useState(() => !!localStorage.getItem("token"))
+
+  useEffect(() => {
+    if (!localStorage.getItem("token")) return
+    api.get<{ user: User }>("/auth/me")
+      .then((response) => setUser(response.data.user))
+      .catch(() => localStorage.removeItem("token"))
+      .finally(() => setChecking(false))
+  }, [])
+
+  function logout() { localStorage.removeItem("token"); setUser(null) }
+
+  if (checking) return <LoadingState text="Loading..." />
+  if (!user) return <AuthPage onAuth={setUser} />
+  return <AuthCtx.Provider value={{ user, canEdit: user.role !== "faculty" }}><AppInner onLogout={logout} /></AuthCtx.Provider>
 }

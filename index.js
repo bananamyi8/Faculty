@@ -1,51 +1,114 @@
-const express = require("express");
-const cors = require("cors");
-const path = require("path");
-const fs = require("fs");
-const yaml = require("js-yaml");
-const swaggerUi = require("swagger-ui-express");
 
-require("dotenv").config();
+require('dotenv').config();
 
+const express = require('express');
+const cors = require('cors');
+const mongoose = require('mongoose');
+
+// Import route files
+const facultyRoutes = require('./routes/faculty.routes');
+const departmentRoutes = require('./routes/department.routes');
+const nonFacultyRoutes = require('./routes/nonfaculty.routes');
+const subjectRoutes = require('./routes/subject.routes');
+const scheduleRoutes = require('./routes/schedule.routes');
+const reportRoutes = require('./routes/report.routes');
+
+// Initialize Express
 const app = express();
-const PORT = process.env.PORT || 5000;
 
-app.use(cors());
-app.use(express.json());
+// Middleware
+app.use(cors({
+  origin: process.env.CLIENT_URL
+    ? process.env.CLIENT_URL.split(',').map(url => url.trim())
+    : true,
+  credentials: true
+}));
 
-// Health Check
-app.get("/api/v1/health", (req, res) => {
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
+
+// Health check
+app.get('/api/health', (req, res) => {
   res.status(200).json({
-    status: "ok"
+    success: true,
+    status: 'ok',
+    database:
+      mongoose.connection.readyState === 1
+        ? 'connected'
+        : 'disconnected',
+    timestamp: new Date().toISOString()
   });
 });
 
-const facultyRoutes = require("./routes/faculty.routes");
-app.use("/api/v1/faculty", facultyRoutes);
+// API version 1 routes
+app.use('/api/v1/faculty', facultyRoutes);
+app.use('/api/v1/departments', departmentRoutes);
+app.use('/api/v1/non-faculty', nonFacultyRoutes);
+app.use('/api/v1/subjects', subjectRoutes);
+app.use('/api/v1/schedules', scheduleRoutes);
+app.use('/api/v1/reports', reportRoutes);
 
-const departmentRoutes = require("./routes/department.routes");
-app.use("/api/v1/departments", departmentRoutes);
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Faculty Management System API is running.',
+    version: '1.0.0',
+    endpoints: {
+      health: '/api/health',
+      faculty: '/api/v1/faculty',
+      departments: '/api/v1/departments',
+      nonFaculty: '/api/v1/non-faculty',
+      subjects: '/api/v1/subjects',
+      schedules: '/api/v1/schedules',
+      reports: '/api/v1/reports'
+    }
+  });
+});
 
-const openApiPath = path.join(__dirname, "../openapi.yaml");
+// Handle unknown routes
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: `Route not found: ${req.method} ${req.originalUrl}`
+  });
+});
 
-if (!fs.existsSync(openApiPath)) {
-    console.error("ERROR: openapi.yaml was not found at:", openApiPath);
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error('API Error:', err);
+
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || 'Internal server error.'
+  });
+});
+
+// Connect to MongoDB and start server
+const PORT = process.env.PORT || 5000;
+
+async function startServer() {
+  try {
+    if (!process.env.MONGODB_URI) {
+      throw new Error('MONGODB_URI is missing from the server .env file.');
+    }
+
+    await mongoose.connect(process.env.MONGODB_URI);
+
+    console.log('MongoDB connected successfully.');
+
+    app.listen(PORT, () => {
+      console.log(`Faculty API running on http://localhost:${PORT}`);
+      console.log(`Health check: http://localhost:${PORT}/api/health`);
+    });
+  } catch (error) {
+    console.error('Server startup failed:', error.message);
     process.exit(1);
+  }
 }
 
-const openApiDocument = yaml.load(
-    fs.readFileSync(openApiPath, "utf8")
-);
+if (require.main === module) {
+  startServer();
+}
 
-
-
-app.use("/docs", swaggerUi.serve, swaggerUi.setup(openApiDocument));
-
-app.get("/", (req, res) => {
-    res.send("Faculty Module API is running!");
-});
-
-app.listen(PORT, () => {
-    console.log(`Faculty API running at http://localhost:${PORT}`);
-    console.log(`Swagger UI at http://localhost:${PORT}/docs`);
-});
+module.exports = { app, startServer };

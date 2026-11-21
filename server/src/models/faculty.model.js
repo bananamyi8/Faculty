@@ -1,32 +1,23 @@
-function validateFaculty(data) {
-  const errors = [];
+const mongoose = require("mongoose");
 
-  if (typeof data.name !== "string" || !data.name.trim()) {
-    errors.push("Name is required.");
+const facultySchema = new mongoose.Schema(
+  {
+    facultyId: { type: Number, unique: true, sparse: true },
+    name: { type: String, required: true, trim: true },
+    department: { type: String, required: true, trim: true },
+    position: { type: String, required: true, trim: true },
+    email: {
+      type: String, required: true, unique: true, lowercase: true, trim: true,
+      match: [/^\S+@\S+\.\S+$/, "Invalid email address"],
+    },
+    status: { type: String, enum: ["ACTIVE", "INACTIVE"], default: "ACTIVE" },
+    disabledAt: { type: Date, default: null },
+  },
+  {
+    timestamps: true,
+    id: false,
+    toJSON: { transform: (doc, ret) => { delete ret._id; delete ret.__v; return ret; } },
   }
-  if (typeof data.department !== "string" || !data.department.trim()) {
-    errors.push("Department is required.");
-  }
-  if (typeof data.position !== "string" || !data.position.trim()) {
-    errors.push("Position is required.");
-  }
-  if (
-    typeof data.email !== "string" ||
-    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim())
-  ) {
-    errors.push("A valid email address is required.");
-  }
+);
 
-  return errors;
-}
-
-function normalizeFaculty(data) {
-  return {
-    name: data.name.trim(),
-    department: data.department.trim(),
-    position: data.position.trim(),
-    email: data.email.trim().toLowerCase()
-  };
-}
-
-module.exports = { validateFaculty, normalizeFaculty };
+module.exports = mongoose.models.Faculty || mongoose.model("Faculty", facultySchema);
