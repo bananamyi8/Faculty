@@ -389,26 +389,34 @@ const navItems: { page: Page; label: string; icon: string }[] = [
 
 function Shell({ page, setPage, onLogout, children }: { page: Page; setPage: (page: Page) => void; onLogout: () => void; children: ReactNode }) {
   const { user } = useAuth()
+  const [open, setOpen] = useState(false)
   const activeTab: Page = page === "add-faculty" || page === "profile" ? "faculty" : page
   return (
     <div className="app-shell">
-      <header className="app-header">
-        <Logo />
-        <div className="header-actions">
-          <span className="user-pill">{user.name} · {user.role}</span>
-          <Button onClick={onLogout}>Log out</Button>
-        </div>
-      </header>
-      <nav className="tabs" aria-label="Main sections">
-        {navItems.filter((item) => canAccess(item.page, user.role)).map((item) => (
-          <button key={item.page} onClick={() => setPage(item.page)} className={`tab ${activeTab === item.page ? "active" : ""}`}>
-            <Icon name={item.icon} size={17} />
-            <span>{item.label}</span>
-          </button>
-        ))}
-      </nav>
-      <main className="content">{children}</main>
-      <footer className="app-footer">Infotech Development System Colleges · Faculty Management</footer>
+      <aside className={`sidebar ${open ? "open" : ""}`}>
+        <Logo className="sidebar-logo" title="IDSC" subtitle="Faculty Management System" />
+        <nav>
+          {navItems.filter((item) => canAccess(item.page, user.role)).map((item) => (
+            <button key={item.page} onClick={() => { setPage(item.page); setOpen(false) }} className={activeTab === item.page ? "active" : ""}>
+              <Icon name={item.icon} />
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </nav>
+        <div className="sidebar-footer"><span>Infotech Development System Colleges</span></div>
+      </aside>
+      {open && <button className="scrim" aria-label="Close menu" onClick={() => setOpen(false)} />}
+      <div className="workspace">
+        <header className="topbar">
+          <button className="menu-btn" aria-label="Open menu" onClick={() => setOpen(true)}><Icon name="menu" /></button>
+          <div className="topbar-title"><Icon name="database" size={18} /><span>Faculty Management System</span></div>
+          <div className="top-actions">
+            <span className="user-pill">{user.name} · {user.role}</span>
+            <Button onClick={onLogout}>Log out</Button>
+          </div>
+        </header>
+        <main className="content">{children}</main>
+      </div>
     </div>
   )
 }
