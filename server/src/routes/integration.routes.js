@@ -3,7 +3,7 @@ const router = require("express").Router();
 const mongoose = require("mongoose");
 
 const Faculty = require("../models/faculty.model");
-const Department = require("../models/department.modeljs");
+const Department = require("../models/department.model");
 
 const {
   verifyIntegrationToken
