@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>IDSC Faculty Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Cormorant+Garamond:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f8f6;--cd:#fff;--tx:#0e2a20;--mu:#667a70;--bd:#cfe5d8;--g:#2a9558;--gd:#0b4630;--gl:#e1f3e8;--am:#fdf0d5;--at:#9a6410;--hd:#f1f6f3;--rd:#d64b3c;--gr:#e9ecea;--gt:#5d6862;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0c1713;--cd:#13241c;--tx:#e6f1ea;--mu:#93a99d;--bd:#244236;--gl:#1a3a2b;--am:#3a2f14;--at:#e6b85a;--hd:#17291f;--gr:#26322c;--gt:#aab7af;color-scheme:dark}}
+:root[data-theme=dark]{--bg:#0c1713;--cd:#13241c;--tx:#e6f1ea;--mu:#93a99d;--bd:#244236;--gl:#1a3a2b;--am:#3a2f14;--at:#e6b85a;--hd:#17291f;--gr:#26322c;--gt:#aab7af;color-scheme:dark}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--tx);font:14px/1.45 Inter,system-ui,sans-serif;display:flex}
+h1,h2,.sf{font-family:'Cormorant Garamond',Georgia,serif;font-weight:500;margin:0}
+aside{width:250px;background:#0b4630;color:#e8f5ee;padding:22px 16px;display:flex;flex-direction:column;flex:none;overflow:auto}
+.brand{display:flex;gap:12px;align-items:center;margin:0 6px 34px}.brand b{font:500 20px/1.1 'Cormorant Garamond',Georgia,serif}
+.logo{width:46px;height:46px;border-radius:50%;background:#2a9558;border:3px solid #7cd09c;display:grid;place-items:center;font-weight:700;font-size:12px;flex:none}
+nav{display:flex;flex-direction:column;gap:4px;flex:1}
+.nv{display:flex;gap:12px;align-items:center;padding:12px 14px;border-radius:12px;color:#e8f5ee;background:none;border:0;font:500 14px Inter,sans-serif;cursor:pointer;text-align:left}
+.nv:hover{background:#14583f}.nv.on{background:#2a9558;box-shadow:0 6px 16px #0004}
+.lo{border-top:1px solid #ffffff2a;margin-top:14px;padding-top:10px}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.mn{flex:1;min-width:0;display:flex;flex-direction:column;height:100%}
+header{display:flex;align-items:center;gap:18px;padding:16px 32px;background:var(--cd);border-bottom:1px solid var(--bd)}
+.sr{flex:1;max-width:500px;display:flex;align-items:center;gap:10px;padding:0 14px;border:1px solid var(--bd);border-radius:12px;background:var(--hd);color:var(--mu)}
+.sr input{border:0;background:none;outline:0;padding:12px 0;width:100%;color:var(--tx);font:inherit}
+.bell{position:relative;margin-left:auto;background:none;border:0;color:var(--tx);cursor:pointer}
+.bell em{position:absolute;top:-7px;right:-7px;background:var(--rd);color:#fff;border-radius:9px;font:600 10px/16px Inter;min-width:16px;text-align:center;font-style:normal}
+.me{display:flex;gap:10px;align-items:center;border-left:1px solid var(--bd);padding-left:18px}.me small{display:block;color:var(--mu)}
+.av{width:44px;height:44px;border-radius:12px;background:var(--gl);color:var(--g);display:grid;place-items:center;font:600 14px Inter;object-fit:cover;flex:none;font-style:normal}
+.me .av{width:38px;height:38px;border-radius:50%}
+main{padding:32px;overflow:auto;flex:1}
+.ph1{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:22px}
+.ph1 h1{font-size:42px;line-height:1.1}.ph1 p{color:var(--mu);margin:8px 0 0}
+.btn{background:var(--g);color:#fff;border:0;border-radius:12px;padding:12px 20px;font:600 14px Inter;cursor:pointer;display:inline-flex;gap:8px;align-items:center;box-shadow:0 6px 14px #2a955844}
+.btn.o{background:var(--cd);color:var(--tx);border:1px solid var(--bd);box-shadow:none}.btn.d{background:var(--rd);box-shadow:none}
+.card{background:var(--cd);border:1px solid var(--g);border-radius:20px;padding:22px}
+.hero{background:linear-gradient(120deg,#0b4630,#2a9558);color:#fff;border-radius:22px;padding:40px 48px;display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:24px;gap:16px}
+.hero small{letter-spacing:.08em;color:#a9e5c2}.hero h1{font-size:58px;line-height:1.1;margin:8px 0}.hero p{margin:0;color:#d3f1e0}
+.hero .btn{background:#ffffff26;border:1px solid #ffffff55;box-shadow:none}
+.gr{display:grid;gap:18px;margin-bottom:24px}.g4{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}.g2{grid-template-columns:3fr 2fr}
+.st{display:flex;gap:16px;align-items:center}.st .av{width:52px;height:52px}.st b{font:500 36px/1 'Cormorant Garamond',Georgia,serif;display:block}.st span{display:block;margin-top:4px}.st small,.sub{color:var(--mu);font-size:12px}
+.ri{display:flex;gap:14px;align-items:center;padding:14px 0;border-top:1px solid var(--bd)}.ri div{flex:1}.ri small{display:block;color:var(--mu)}
+.cl{display:flex;gap:14px;align-items:center;padding:12px 16px;border-left:3px solid var(--g);background:var(--gl);border-radius:10px;margin-top:10px}.cl div{flex:1}.cl small{display:block;color:var(--mu)}
+.tb{overflow:auto}
+.fl{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap}.fl>*{padding:12px 14px;border:1px solid var(--bd);border-radius:12px;background:var(--cd);color:var(--tx);font:inherit}.fl input{flex:1;min-width:200px}
+table{width:100%;border-collapse:collapse;min-width:680px}
+th{background:var(--hd);text-align:left;font:500 11px Inter;color:var(--mu);letter-spacing:.06em;text-transform:uppercase;padding:13px 16px}
+td{padding:14px 16px;border-top:1px solid var(--bd);vertical-align:middle}
+.pp{display:flex;gap:12px;align-items:center}.pp .av{width:44px;height:44px}.pp small{display:block;color:var(--mu);font-size:11px}
+code{font:600 11px ui-monospace,Menlo,monospace}
+.pl{padding:3px 10px;border-radius:12px;font-size:12px;background:var(--gl);color:var(--g);font-weight:500;white-space:nowrap}.pl.a{background:var(--am);color:var(--at)}.pl.n{background:var(--gr);color:var(--gt)}
+.ac{display:flex;gap:8px}.ib{width:36px;height:36px;border:1px solid var(--bd);border-radius:9px;background:var(--cd);color:var(--mu);cursor:pointer;display:grid;place-items:center}.ib:hover{color:var(--g);border-color:var(--g)}
+.pg{display:flex;justify-content:space-between;align-items:center;padding-top:16px;color:var(--mu);font-size:12px;flex-wrap:wrap;gap:8px}.pg div{display:flex;gap:6px}
+.pg button{border:1px solid var(--bd);background:var(--cd);color:var(--tx);border-radius:8px;padding:6px 10px;cursor:pointer}.pg .on{background:var(--g);color:#fff;border-color:var(--g)}
+.em{text-align:center;padding:48px 16px;color:var(--mu)}.em b{display:block;font:500 24px 'Cormorant Garamond',Georgia,serif;color:var(--tx)}
+#m{position:fixed;inset:0;background:#0007;display:none;place-items:center;padding:16px;z-index:20}#m.s{display:grid}
+.md{background:var(--cd);border-radius:18px;padding:26px;width:min(520px,100%);max-height:90vh;overflow:auto}.md h2{font-size:30px;margin-bottom:14px}
+.md label{display:block;font-weight:500;margin-bottom:12px}.md input,.md select,.md textarea{display:block;width:100%;margin-top:5px;padding:10px 12px;border:1px solid var(--bd);border-radius:10px;background:var(--bg);color:var(--tx);font:inherit}
+.md textarea{min-height:200px;font:12px ui-monospace,monospace}
+.fa{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}.er{color:var(--rd);margin:0 0 8px;font-weight:500}
+.dl{display:grid;grid-template-columns:130px 1fr;gap:8px 12px}.dl dt{color:var(--mu)}.dl dd{margin:0}
+.bar{display:flex;align-items:center;gap:10px;margin:8px 0}.bar span{width:150px;flex:none}.bar i{height:10px;background:var(--g);border-radius:5px;display:block}.bar b{font-weight:500}
+#lg{position:fixed;inset:0;background:#0b4630;display:none;place-items:center;z-index:30;padding:16px}#lg.s{display:grid}#lg .md{text-align:left}#lg .logo,#lg h2,#lg .sub{text-align:center}
+@media(max-width:860px){body{flex-direction:column}aside{width:100%;flex-direction:row;padding:10px;align-items:center;gap:8px}.brand,.lo span{display:none}nav{flex-direction:row;overflow:auto}.nv{padding:10px;font-size:0}.lo{border:0;margin:0;padding:0}main{padding:16px}header{padding:12px 16px}.me div{display:none}.g2{grid-template-columns:1fr}.hero{padding:24px;flex-direction:column;align-items:flex-start}.hero h1,.ph1 h1{font-size:36px}}
+</style></head><body>
+<aside><div class="brand"><div class="logo">IDSC</div><b>Infotech Development System Colleges</b></div><nav id="nv"></nav>
+<div class="lo"><button class="nv" id="out"></button></div></aside>
+<div class="mn"><header><label class="sr"><span id="si"></span><input id="gs" placeholder="Search faculty, subjects, departments…"></label>
+<button class="bell" id="bl"></button><div class="me"><i class="av" id="mav"></i><div><b id="mn"></b><small id="mr"></small></div></div></header>
+<main id="main"></main></div>
+<div id="m"></div>
+<div id="lg"><form class="md" id="lf"><div class="logo" style="margin:0 auto 12px">IDSC</div><h2 id="lt"></h2><p class="sub" id="lsub"></p><p class="er" id="le"></p>
+<div id="lx"><label>College name<input name="college" placeholder="Infotech Development System Colleges"></label><label>Your full name<input name="name" placeholder="Dr. Marilou Lasangan"></label></div>
+<label>Username<input name="username" required autocomplete="username"></label><label>Password<input name="password" type="password" required minlength="6" autocomplete="current-password"></label><button class="btn" style="width:100%;justify-content:center">Continue</button></form></div>
+<script>
+const KEY='idsc_cms_v1',P={grid:'M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z',users:'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8',up:'M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M8.5 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M20 8v6M23 11h-6',bank:'M3 21h18M5 21V10M19 21V10M9 21V10M15 21V10M2 10l10-7 10 7z',book:'M4 4h16v13H8l-4 4zM8 9h8M8 13h5',cal:'M3 5h18v16H3zM3 10h18M8 3v4M16 3v4',chart:'M4 20V10M10 20V4M16 20v-7M22 20H2',gear:'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2',out:'M9 21H5V3h4M16 17l5-5-5-5M21 12H9',eye:'M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6',edit:'M12 20h9M16.5 3.5l4 4L8 20l-5 1 1-5z',trash:'M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15',plus:'M12 5v14M5 12h14',bell:'M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M10 21h4',search:'M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16M21 21l-4.3-4.3',clock:'M12 7v5l3 2M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18',award:'M12 15a6 6 0 1 0 0-12 6 6 0 0 0 0 12M8.2 13.9 7 22l5-3 5 3-1.2-8.1',doc:'M6 2h9l5 5v15H6zM14 2v6h6M9 13h7M9 17h7',shield:'M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z',check:'M4 12l5 5L20 6',x:'M6 6l12 12M18 6L6 18'};
+const ic=n=>`<svg class="i" viewBox="0 0 24 24"><path d="${P[n]}"/></svg>`;
+let S={faculty:[],nonfaculty:[],departments:[],subjects:[],schedules:[],leaves:[],attendance:[],grades:[],users:[],log:[],cfg:{},me:null};
+let seen=0;try{seen=+localStorage.getItem('idsc_seen')||0}catch(e){}
+const api=async(m,u,b)=>{const r=await fetch('/api'+u,{method:m,headers:{'Content-Type':'application/json'},body:b?JSON.stringify(b):undefined});const j=await r.json().catch(()=>({}));
+if(r.status==401&&!/^\/(login|setup|status)/.test(u))boot();if(!r.ok)throw Object.assign(new Error(j.error||'Request failed.'),{status:r.status});return j};
+const refresh=async()=>{S=Object.assign(S,await api('GET','/data'))};
+const dl=(n,t,mime)=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:mime||'application/json'}));a.download=n;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1e3)};
+const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const ago=t=>{const m=Math.round((Date.now()-t)/6e4);return m<1?'just now':m<60?m+' min ago':m<1440?Math.round(m/60)+' hr ago':Math.round(m/1440)+' d ago'};
+const ini=n=>(n||'?').replace(/^(Dr|Prof|Mr|Ms|Mrs)\.?\s+/i,'').split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+const av=r=>r.photo?`<img class="av" src="${r.photo}" alt="">`:`<i class="av">${esc(ini(r.name))}</i>`;
+const pill=v=>`<span class="pl ${['On Leave','Contractual','Pending','Late'].includes(v)?'a':['Inactive','Part-time','Rejected','Absent','Failed'].includes(v)?'n':''}">${esc(v)}</span>`;
+const person=r=>`<div class="pp">${av(r)}<div>${esc(r.name)}<small>${esc(r.email||'')}</small></div></div>`;
+const t12=t=>{if(!t)return'';let[h,m]=t.split(':').map(Number);return(h%12||12)+':'+String(m).padStart(2,'0')+' '+(h<12?'AM':'PM')};
+const mins=t=>{const[h,m]=t.split(':').map(Number);return h*60+m};
+const DAYS=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+const LT=['Sick Leave','Vacation Leave','Emergency Leave','Maternity/Paternity Leave','Study Leave','Other'],AS=['Present','Late','Absent','Excused'],TM=['Prelim','Midterm','Final'],ROLE={admin:'Administrator',depthead:'Department Head',faculty:'Faculty'};
+const E={
+faculty:{t:'Faculty Management',s:'Manage faculty profiles, assignments, and employment records.',a:'Add faculty',ph:'Search by name, ID, or email…',flt:[['dept','All departments'],['status','All statuses']],
+f:[['name','Full name'],['id','Faculty ID'],['email','Email','email'],['dept','Department','dept'],['pos','Position'],['status','Status','sel',['Active','On Leave','Inactive']],['photo','Photo','photo']],
+c:[['Faculty member',person],['Faculty ID',r=>`<code>${esc(r.id)}</code>`],['Department',r=>esc(r.dept)],['Position',r=>esc(r.pos)],['Status',r=>pill(r.status)]]},
+nonfaculty:{t:'Non-Faculty Management',s:'Manage non-teaching personnel and staff information.',a:'Add Non-Faculty Staff',ph:'Search by name or employee ID…',flt:[['dept','All departments'],['pos','All positions'],['status','All statuses'],['type','All employment types']],
+f:[['name','Full name'],['id','Employee ID'],['email','Email','email'],['dept','Department / Office'],['pos','Position / Job title'],['type','Employment type','sel',['Permanent','Contractual','Part-time']],['contact','Contact number','tel'],['status','Status','sel',['Active','On Leave','Inactive']],['photo','Photo','photo']],
+c:[['Employee ID',r=>`<code>${esc(r.id)}</code>`],['Full name',person],['Department / Office',r=>esc(r.dept)],['Position',r=>esc(r.pos)],['Type',r=>pill(r.type)],['Contact',r=>esc(r.contact||'—')],['Status',r=>pill(r.status)]]},
+departments:{t:'Departments',s:'Organize the college into departments and assign heads.',a:'Add department',ph:'Search departments…',flt:[],
+f:[['name','Department name'],['head','Department head','text']],
+c:[['Department',r=>esc(r.name)],['Head',r=>esc(r.head||'—')],['Faculty',r=>S.faculty.filter(x=>x.dept==r.name).length],['Subjects',r=>S.subjects.filter(x=>x.dept==r.name).length]]},
+subjects:{t:'Subjects',s:'Maintain the list of subjects offered this term.',a:'Add subject',ph:'Search by code or title…',flt:[['dept','All departments']],
+f:[['code','Subject code'],['title','Subject title'],['units','Units','number'],['dept','Department','dept']],
+c:[['Code',r=>`<code>${esc(r.code)}</code>`],['Title',r=>esc(r.title)],['Units',r=>esc(r.units)],['Department',r=>esc(r.dept)]]},
+schedules:{t:'Class Schedules',s:'Assign subjects, faculty, rooms, and time slots without conflicts.',a:'Add schedule',ph:'Search subject, section, room…',flt:[['day','All days'],['faculty','All faculty']],
+f:[['subject','Subject','sub'],['section','Section'],['faculty','Faculty','fac'],['room','Room'],['day','Day','sel',DAYS],['start','Start time','time'],['end','End time','time']],
+c:[['Subject',r=>`<b>${esc(r.subject)}</b><small class="sub" style="display:block">${esc(r.section)}</small>`],['Faculty',r=>esc(r.faculty)],['Room',r=>esc(r.room)],['Day',r=>esc(r.day)],['Time',r=>t12(r.start)+' – '+t12(r.end)]]},
+leaves:{t:'Leave Requests',s:'File, review, and track leave requests.',a:'File leave request',ph:'Search leave requests…',flt:[['status','All statuses'],['type','All leave types']],
+f:[['type','Leave type','sel',LT],['from','From','date'],['to','To','date'],['reason','Reason']],
+c:[['Faculty',r=>esc(r.faculty)],['Type',r=>esc(r.type)],['Dates',r=>esc(r.from)+(r.to!=r.from?' → '+esc(r.to):'')],['Reason',r=>esc(r.reason)],['Status',r=>pill(r.status)+(r.by?`<small class="sub" style="display:block">${esc(r.by)}${r.note?': '+esc(r.note):''}</small>`:'')]]},
+attendance:{t:'Attendance',s:'Daily time in and time out records for faculty.',a:'Add attendance record',ph:'Search attendance…',flt:[['status','All statuses'],['faculty','All faculty']],
+f:[['faculty','Faculty','fac'],['date','Date','date'],['status','Status','sel',AS],['in','Time in','time'],['out','Time out','time'],['note','Note']],
+c:[['Date',r=>esc(r.date)],['Faculty',r=>esc(r.faculty)],['Time in',r=>t12(r.in)||'—'],['Time out',r=>t12(r.out)||'—'],['Status',r=>pill(r.status)],['Note',r=>esc(r.note||'')]]},
+grades:{t:'Grades',s:'Record and review student grades per class.',a:'Add grade',ph:'Search by student or subject…',flt:[['term','All terms'],['subject','All subjects']],
+f:[['sid','Class','sch'],['studentId','Student ID'],['student','Student name'],['term','Term','sel',TM],['grade','Grade (0–100)','number']],
+c:[['Class',r=>`<b>${esc(r.subject)}</b><small class="sub" style="display:block">${esc(r.section)}</small>`],['Student',r=>esc(r.student)+`<small class="sub" style="display:block">${esc(r.studentId)}</small>`],['Term',r=>esc(r.term)],['Grade',r=>esc(r.grade)],['Remarks',r=>pill(r.grade>=75?'Passed':'Failed')]]},
+users:{t:'User Accounts',s:'Create separate logins for administrators, department heads, and faculty.',a:'Add user',ph:'Search users…',flt:[['role','All roles']],
+f:[['name','Full name'],['username','Username'],['password','Password (leave blank to keep)','password'],['role','Role (admin, depthead, faculty)','sel',['admin','depthead','faculty']],['dept','Department (department heads only)','dept'],['fcode','Linked faculty record','fid']],
+c:[['Name',r=>esc(r.name)],['Username',r=>`<code>${esc(r.username)}</code>`],['Role',r=>pill(ROLE[r.role])],['Department',r=>esc(r.dept||'—')],['Faculty record',r=>esc(r.fname||'—')]]}};
+const KEYS={faculty:'id',nonfaculty:'id',departments:'name',subjects:'code'},OPT=['photo','email','contact','head','pos','in','out','note'];
+const NAVALL=[['dashboard','Dashboard','grid'],['faculty','Faculty','users'],['nonfaculty','Non-Faculty','up'],['departments','Departments','bank'],['subjects','Subjects','book'],['schedules','Class Schedules','cal'],['leaves','Leave Requests','doc'],['attendance','Attendance','clock'],['grades','Grades','award'],['reports','Reports','chart'],['users','Users','shield'],['settings','Settings','gear']];
+const PAGES={admin:null,depthead:['dashboard','faculty','nonfaculty','subjects','schedules','leaves','attendance','grades','reports','settings'],faculty:['dashboard','schedules','leaves','attendance','grades','settings']};
+const NAV=()=>!S.me?[]:NAVALL.filter(n=>!PAGES[S.me.role]||PAGES[S.me.role].includes(n[0]));
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+let page='dashboard',ls={q:'',f:{},p:1},photo;
+const D=()=>S.departments.map(d=>d.name);
+function nav(){$('#nv').innerHTML=NAV().map(n=>`<button class="nv ${n[0]==page?'on':''}" data-p="${n[0]}">${ic(n[2])}${n[1]}</button>`).join('');
+$('#out').innerHTML=ic('out')+'<span>Logout</span>';$('#si').innerHTML=ic('search');
+const a=(S.me&&S.me.name)||'Administrator',n=(S.me&&S.me.role!='faculty')?S.leaves.filter(x=>x.status=='Pending').length:0;$('.brand b').textContent=S.cfg.college||'';
+$('#bl').innerHTML=ic('bell')+(n?`<em>${n}</em>`:'');$('#mn').textContent=a;$('#mr').textContent=S.me?ROLE[S.me.role]:'';$('#mav').textContent=ini(a)}
+function go(p){if(S.me&&PAGES[S.me.role]&&!PAGES[S.me.role].includes(p))p='dashboard';page=p;ls={q:'',f:{},p:1};$('#gs').value='';nav();render()}
+function render(){const m=$('#main');if(page=='dashboard')return dash(m);if(page=='reports')return reports(m);if(page=='settings')return settings(m);
+const e=E[page],cp=CAP();m.innerHTML=`<div class="ph1"><div><h1>${e.t}</h1><p>${e.s}</p></div><div class="ac">${page=='attendance'&&S.me.fid?'<button class="btn o" id="tin">Time in</button><button class="btn o" id="tout">Time out</button>':''}${cp.add?`<button class="btn" id="add">${ic('plus')}${e.a}</button>`:''}</div></div>
+<div class="card"><div class="fl"><input id="q" placeholder="${e.ph}" value="${esc(ls.q)}">${e.flt.map(([k,l])=>`<select data-k="${k}"><option value="">${l}</option>${[...new Set(S[page].map(r=>r[k]).filter(Boolean))].sort().map(v=>`<option ${ls.f[k]==v?'selected':''}>${esc(v)}</option>`).join('')}</select>`).join('')}</div><div class="tb" id="tb"></div><div class="pg" id="pg"></div></div>`;
+if($('#add'))$('#add').onclick=()=>form();if($('#tin')){$('#tin').onclick=()=>clock('in');$('#tout').onclick=()=>clock('out')}$('#q').oninput=x=>{ls.q=x.target.value;ls.p=1;draw()};
+m.querySelectorAll('select[data-k]').forEach(s=>s.onchange=()=>{ls.f[s.dataset.k]=s.value;ls.p=1;draw()});draw()}
+function draw(){const e=E[page],s=ls.q.toLowerCase();
+const rows=S[page].filter(r=>(!s||Object.entries(r).some(([k,v])=>k!='photo'&&k!='_id'&&String(v).toLowerCase().includes(s)))&&Object.entries(ls.f).every(([k,v])=>!v||r[k]==v));
+const pp=5,pages=Math.max(1,Math.ceil(rows.length/pp));ls.p=Math.min(ls.p,pages);const vis=rows.slice((ls.p-1)*pp,ls.p*pp);
+$('#tb').innerHTML=rows.length?`<table><thead><tr>${e.c.map(c=>`<th>${c[0]}</th>`).join('')}<th>Actions</th></tr></thead><tbody>${vis.map(r=>`<tr>${e.c.map(c=>`<td>${c[1](r)}</td>`).join('')}<td><div class="ac">${acts(r)}</div></td></tr>`).join('')}</tbody></table>`:
+`<div class="em"><b>${S[page].length?'No matches found':'Nothing here yet'}</b>${S[page].length?'Try a different search or clear the filters.':'Use the “'+e.a+'” button to add the first record.'}</div>`;
+$('#tb').querySelectorAll('.ib').forEach(b=>b.onclick=()=>{const r=S[page].find(x=>x._id==b.dataset.id);({v:view,e:form,d:del,ok:r=>decide(r,'Approved'),no:r=>decide(r,'Rejected')})[b.dataset.a](r)});
+$('#pg').innerHTML=rows.length?`<span>Showing ${(ls.p-1)*pp+1}–${(ls.p-1)*pp+vis.length} of ${rows.length} records</span><div><button ${ls.p<2?'disabled':''} data-n="${ls.p-1}">Previous</button>${Array.from({length:pages},(_,i)=>`<button class="${i+1==ls.p?'on':''}" data-n="${i+1}">${i+1}</button>`).join('')}<button ${ls.p>=pages?'disabled':''} data-n="${ls.p+1}">Next</button></div>`:'';
+$('#pg').querySelectorAll('button').forEach(b=>b.onclick=()=>{ls.p=+b.dataset.n;draw()})}
+const CAP=()=>{const r=S.me.role,ad=r=='admin',me=!!S.me.fid;return({faculty:{add:ad},nonfaculty:{add:ad},departments:{add:ad},subjects:{add:r!='faculty'},schedules:{add:r!='faculty'},users:{add:ad},leaves:{add:me},attendance:{add:r!='faculty'},grades:{add:ad||me}})[page]||{}};
+const mine=x=>x.fid&&x.fid==S.me.fid;
+function acts(r){const b=(a,t,i)=>`<button class="ib" data-a="${a}" data-id="${r._id}" title="${t}">${ic(i)}</button>`,R=S.me.role,ad=R=='admin';let h=b('v','View','eye');
+if(page=='leaves'){if(r.status=='Pending'&&R!='faculty'&&!mine(r))h+=b('ok','Approve','check')+b('no','Reject','x');if(ad||(mine(r)&&r.status=='Pending'))h+=b('d',ad?'Delete':'Cancel request','trash');return h}
+const ed=page=='grades'?(ad||mine(r)):(page=='faculty'||page=='nonfaculty'||page=='departments'||page=='users')?ad:R!='faculty';
+return h+(ed?b('e','Edit','edit')+b('d','Delete','trash'):'')}
+function decide(r,s){const ok=s=='Approved';modal(`<h2>${ok?'Approve':'Reject'} leave?</h2><p class="er" id="er"></p><p>${esc(r.faculty)} · ${esc(r.type)} · ${esc(r.from)}${r.to!=r.from?' → '+esc(r.to):''}</p><label>Note (optional)<input id="nt" maxlength="200"></label><div class="fa"><button class="btn o" onclick="closeM()">Cancel</button><button class="btn ${ok?'':'d'}" id="yes">${ok?'Approve':'Reject'}</button></div>`);
+$('#yes').onclick=async()=>{try{await api('PUT','/leaves/'+r._id+'/decision',{status:s,note:$('#nt').value});await refresh();closeM();nav();render()}catch(x){$('#er').textContent=x.message}}}
+async function clock(a){try{await api('POST','/attendance/clock',{action:a});await refresh();render()}catch(x){modal(`<h2>Attendance</h2><p class="er">${esc(x.message)}</p><div class="fa"><button class="btn" onclick="closeM()">OK</button></div>`)}}
+const modal=h=>{$('#m').innerHTML=`<div class="md">${h}</div>`;$('#m').classList.add('s')},closeM=()=>$('#m').classList.remove('s');
+$('#m').onclick=e=>{if(e.target.id=='m')closeM()};
+function view(r){const e=E[page];let extra='';if(page=='faculty')extra=`<dt>Classes</dt><dd>${S.schedules.filter(x=>x.faculty==r.name).map(x=>`${esc(x.subject)} · ${esc(x.day)} ${t12(x.start)}`).join('<br>')||'None assigned'}</dd>`;
+modal(`<h2>${esc(r.name||r.code||'Details')}</h2><dl class="dl">${e.f.filter(f=>!['photo','password','sch'].includes(f[2])).map(f=>`<dt>${f[1]}</dt><dd>${esc(r[f[0]]||'—')}</dd>`).join('')}${extra}</dl><div class="fa"><button class="btn o" onclick="closeM()">Close</button></div>`)}
+function del(r){modal(`<h2>Delete record?</h2><p class="er" id="er"></p><p>This permanently removes <b>${esc(r.name||r.code||r.subject||r.faculty||r.student)}</b>. This can’t be undone.</p><div class="fa"><button class="btn o" onclick="closeM()">Cancel</button><button class="btn d" id="yes">Delete</button></div>`);
+$('#yes').onclick=async()=>{try{await api('DELETE','/'+page+'/'+r._id);await refresh();closeM();nav();render()}catch(x){$('#er').textContent=x.message}}}
+function form(r){const e=E[page],v=r||{};photo=v.photo;
+if(page=='schedules'&&(!S.subjects.length||!S.faculty.length))return modal(`<h2>Add subjects and faculty first</h2><p>A schedule needs at least one subject and one faculty member.</p><div class="fa"><button class="btn" onclick="closeM()">OK</button></div>`);
+if(page!='users'&&e.f.some(f=>f[2]=='dept')&&!S.departments.length)return modal(`<h2>Add a department first</h2><p>Create at least one department so it can be assigned here.</p><div class="fa"><button class="btn o" onclick="closeM()">Close</button><button class="btn" onclick="closeM();go('departments')">Go to Departments</button></div>`);
+modal(`<h2>${r?'Edit':'Add'} record</h2><form id="fm"><p class="er" id="er"></p>${e.f.map(([k,l,t='text',o])=>{if(t=='photo')return`<label>${l} (optional)<span style="display:flex;gap:12px;align-items:center;margin-top:5px"><span id="pv">${av({photo,name:v.name})}</span><input type="file" accept="image/*" id="pf"></span></label>`;
+if(['sel','dept','fac','sub','sch','fid'].includes(t)){const op=t=='sel'?o:t=='dept'?D():t=='fac'?S.faculty.map(x=>x.name):t=='sch'?S.schedules.filter(x=>S.me.role=='admin'||x.faculty==S.me.fname).map(x=>[x._id,x.subject+' · '+x.section]):t=='fid'?S.faculty.map(x=>[x.id,x.name+' ('+x.id+')']):S.subjects.map(x=>x.code);return`<label>${l}<select name="${k}"><option value="">${t=='fid'||t=='dept'&&page=='users'?'None':'Select…'}</option>${op.map(x=>{const a=Array.isArray(x)?x:[x,x];return`<option value="${esc(a[0])}" ${a[0]==v[k]?'selected':''}>${esc(a[1])}</option>`}).join('')}</select></label>`}
+return`<label>${l}<input name="${k}" type="${t}" value="${esc(v[k])}"></label>`}).join('')}<div class="fa"><button type="button" class="btn o" onclick="closeM()">Cancel</button><button class="btn">Save</button></div></form>`);
+const pf=$('#pf');if(pf)pf.onchange=()=>{const f=pf.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=c.height=96;const x=c.getContext('2d'),s=Math.min(im.width,im.height);x.drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,96,96);photo=c.toDataURL('image/jpeg',.8);$('#pv').innerHTML=av({photo})};im.src=rd.result};rd.readAsDataURL(f)};
+$('#fm').onsubmit=async ev=>{ev.preventDefault();const d=Object.fromEntries(new FormData(ev.target));d.photo=photo;const er=m=>{$('#er').textContent=m};
+for(const f of e.f)if(f[2]!='photo'&&!OPT.includes(f[0])&&!(page=='users'&&['password','dept','fcode'].includes(f[0]))&&!String(d[f[0]]||'').trim())return er(f[1]+' is required.');
+d.name!==undefined&&(d.name=d.name.trim());
+try{await api(r?'PUT':'POST','/'+page+(r?'/'+r._id:''),d);await refresh();closeM();nav();render()}catch(x){er(x.message)}}}
+function dash(m){const a=(S.me&&S.me.name)||'Administrator',now=new Date(),day=now.toLocaleDateString('en-US',{weekday:'long'}),nm=now.getHours()*60+now.getMinutes();
+const cl=S.schedules.filter(x=>x.day==day).sort((a,b)=>a.start.localeCompare(b.start));
+const R=S.me.role,pend=S.leaves.filter(x=>x.status=='Pending').length,here=x=>x.status=='Present'||x.status=='Late';
+const stat=R=='faculty'?[['cal','My Classes',S.schedules.length,'Assigned'],['doc','Pending Leaves',pend,'Awaiting approval'],['clock','Days Present',S.attendance.filter(here).length,'Recorded'],['award','Grades Entered',S.grades.length,'All terms']]:[['users','Total Faculty',S.faculty.length,'In your scope'],R=='admin'?['bank','Departments',S.departments.length,'Registered']:['book','Subjects',S.subjects.length,'In the catalog'],['doc','Pending Leaves',pend,'Need review'],['clock','Present Today',S.attendance.filter(x=>x.date==today()&&here(x)).length,'Faculty checked in']];
+m.innerHTML=`<div class="hero"><div><small>${now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}).toUpperCase()}</small><h1>Hello, ${esc(a)}.</h1><p>Here’s what’s happening across your faculty today.</p></div>${R=='admin'?`<button class="btn" id="af">${ic('plus')}Add faculty</button>`:''}</div>
+<div class="gr g4">${stat.map(s=>`<div class="card st"><i class="av">${ic(s[0])}</i><div><b>${String(s[2]).padStart(2,'0')}</b><span>${s[1]}</span><small>${s[3]}</small></div></div>`).join('')}</div>
+<div class="gr g2"><div class="card"><div class="ph1" style="margin:0"><div><h2 style="font:500 20px Inter">${R=='admin'?'Recent activity':'Leave requests'}</h2><small class="sub">${R=='admin'?'Latest updates across the college':'Latest requests'}</small></div></div>${(R=='admin'?S.log.slice(0,5):[]).map(l=>`<div class="ri"><i class="av">${ic('edit')}</i><div>${esc(l.m)}<small>${esc(l.s)}</small></div><small>${ago(l.t)}</small></div>`).join('')+(R=='admin'?'':S.leaves.slice(0,5).map(l=>`<div class="ri"><i class="av">${ic('doc')}</i><div>${esc(l.faculty)} · ${esc(l.type)}<small>${esc(l.from)} → ${esc(l.to)}</small></div>${pill(l.status)}</div>`).join(''))||'<div class="em">Nothing here yet. Changes will show up here.</div>'}</div>
+<div class="card"><h2 style="font:500 20px Inter">Upcoming classes</h2><small class="sub">${day}</small>${cl.map(x=>{const s=mins(x.start),e=mins(x.end),st=nm<s?'Upcoming':nm<e?'Ongoing':'Done';return`<div class="cl"><small style="color:var(--tx)">${t12(x.start)}</small><div>${esc(x.subject)}<small>${esc(x.section)} · ${esc(x.room)}</small></div>${pill(st=='Done'?'Inactive':st)}</div>`}).join('')||'<div class="em">No classes scheduled today.</div>'}</div></div>`;
+if($('#af'))$('#af').onclick=()=>{page='faculty';nav();render();form()}}
+function csv(k){const f=k=='grades'?[['subject','Subject'],['section','Section'],['studentId','Student ID'],['student','Student'],['term','Term'],['grade','Grade']]:E[k].f.filter(x=>x[2]!='photo');return[f.map(x=>x[1]).join(','),...S[k].map(r=>f.map(x=>`"${String(r[x[0]]||'').replace(/"/g,'""')}"`).join(','))].join('\n')}
+function reports(m){const cnt=(arr,k)=>{const o={};arr.forEach(r=>o[r[k]||'Unassigned']=(o[r[k]||'Unassigned']||0)+1);return Object.entries(o).sort((a,b)=>b[1]-a[1])};
+const bars=(arr,k)=>{const c=cnt(arr,k),mx=Math.max(1,...c.map(x=>x[1]));return c.map(([n,v])=>`<div class="bar"><span>${esc(n)}</span><i style="width:${v/mx*60}%"></i><b>${v}</b></div>`).join('')||'<small class="sub">No data yet.</small>'};
+m.innerHTML=`<div class="ph1"><div><h1>Reports</h1><p>Summaries of your college records, computed from live data.</p></div></div>
+<div class="gr g4" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))"><div class="card"><h2>Faculty by department</h2>${bars(S.faculty,'dept')}</div><div class="card"><h2>Faculty by status</h2>${bars(S.faculty,'status')}</div><div class="card"><h2>Staff by employment type</h2>${bars(S.nonfaculty,'type')}</div><div class="card"><h2>Classes per day</h2>${bars(S.schedules,'day')}</div><div class="card"><h2>Leave requests by status</h2>${bars(S.leaves,'status')}</div><div class="card"><h2>Attendance by status</h2>${bars(S.attendance,'status')}</div></div>
+<div class="card"><h2 style="margin-bottom:10px">Export data as CSV</h2><div class="fa" style="justify-content:flex-start;flex-wrap:wrap">${['faculty','nonfaculty','subjects','schedules','leaves','attendance','grades'].map(k=>`<button class="btn o" data-x="${k}">${E[k].t}</button>`).join('')}</div></div>`;
+m.querySelectorAll('[data-x]').forEach(b=>b.onclick=()=>dl(b.dataset.x+'.csv','\ufeff'+csv(b.dataset.x),'text/csv'))}
+function settings(m){m.innerHTML=`<div class="ph1"><div><h1>Settings</h1><p>Update your account details and password.</p></div></div>
+<div class="card" style="max-width:600px;margin-bottom:20px"><form id="sf">${S.me.role=='admin'?`<label>College name<input name="college" value="${esc(S.cfg.college)}"></label>`:''}<label>Your name<input name="name" value="${esc(S.me&&S.me.name)}"></label><label>New password (leave blank to keep)<input name="password" type="password" minlength="6" autocomplete="new-password"></label><button class="btn">Save changes</button> <span id="sm" class="sub"></span></form></div>
+${S.me.role!='admin'?'':`<div class="card" style="max-width:600px"><h2 style="margin-bottom:6px">Backup and reset</h2><p class="sub">Download all records as a file, restore them later, or start over.</p><div class="fa" style="justify-content:flex-start;flex-wrap:wrap"><button class="btn o" id="bk">Download backup</button><button class="btn o" id="rs">Restore from file</button><input type="file" id="rf" accept=".json" hidden><button class="btn d" id="er2">Erase all data</button></div></div>`}`;
+$('#sf').onsubmit=async e=>{e.preventDefault();const d=Object.fromEntries(new FormData(e.target));try{await api('PUT','/settings',d);await refresh();nav();$('#sm').textContent='Saved.'}catch(x){$('#sm').textContent=x.message}};
+if($('#bk'))$('#bk').onclick=async()=>dl('idsc-backup-'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify(await api('GET','/backup'),null,2));
+if($('#rs'))$('#rs').onclick=()=>$('#rf').click();
+if($('#rf'))$('#rf').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=async()=>{try{await api('POST','/restore',JSON.parse(r.result));await refresh();nav();render();$('#sm').textContent='Backup restored.'}catch(x){$('#sm').textContent=x.message||'Invalid backup file.'}};r.readAsText(f)};
+if($('#er2'))$('#er2').onclick=()=>{modal(`<h2>Erase all data?</h2><p>Every faculty, staff, department, subject, and schedule record will be deleted. Your login stays. This can’t be undone.</p><div class="fa"><button class="btn o" onclick="closeM()">Cancel</button><button class="btn d" id="yes">Erase everything</button></div>`);$('#yes').onclick=async()=>{await api('POST','/reset');await refresh();closeM();nav();render()}}}
+$('#nv').onclick=e=>{const b=e.target.closest('[data-p]');if(b)go(b.dataset.p)};
+$('#bl').onclick=()=>go('leaves');
+$('#gs').oninput=e=>{const v=e.target.value;if(!E[page])go(S.me&&S.me.role=='faculty'?'schedules':'faculty');ls.q=v;ls.p=1;$('#gs').value=v;const q=$('#q');if(q)q.value=v;draw()};
+let setup=false;
+function login(su){setup=su;$('#lt').textContent=su?'Set up your college':(S.cfg.college||'Sign in');$('#lsub').textContent=su?'Create the first administrator account.':'Sign in to manage faculty, staff, subjects, and class schedules.';$('#lx').style.display=su?'':'none';$('#le').textContent='';$('#lg').classList.add('s')}
+$('#lf').onsubmit=async e=>{e.preventDefault();const d=Object.fromEntries(new FormData(e.target));try{await api('POST',setup?'/setup':'/login',d);$('#lg').classList.remove('s');e.target.reset();await start()}catch(x){$('#le').textContent=x.message}};
+async function start(){await refresh();nav();go('dashboard')}
+async function boot(){try{const s=await api('GET','/status');S.cfg=s.cfg||S.cfg;nav();if(s.user)start();else login(s.needsSetup)}catch(e){$('#main').innerHTML='<div class="em"><b>Can’t reach the server</b>Make sure it is running (npm start), then refresh this page.</div>'}}
+$('#out').onclick=async()=>{try{await api('POST','/logout')}catch(e){}S.me=null;boot()};
+nav();boot();
+</script></body></html>

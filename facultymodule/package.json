@@ -1,0 +1,10 @@
+{
+  "name": "idsc-faculty-management",
+  "version": "2.0.0",
+  "description": "Faculty module of the IDSC College Management System (MongoDB Atlas, role-based logins)",
+  "main": "server.js",
+  "scripts": { "start": "node server.js", "migrate": "node migrate.js" },
+  "engines": { "node": ">=18" },
+  "dependencies": { "mongodb": "^6.10.0" },
+  "license": "MIT"
+}

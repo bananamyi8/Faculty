@@ -12,6 +12,7 @@ const errorHandler = require("./middleware/error-handler");
 const { protect, authorize } = require("./middleware/auth.middleware");
 
 const authRoutes = require("./routes/auth.routes");
+const integrationRoutes = require("./routes/integration.routes");
 const facultyRoutes = require("./routes/faculty.routes");
 const departmentRoutes = require("./routes/department.routes");
 const nonFacultyRoutes = require("./routes/nonfaculty.routes");
@@ -39,6 +40,7 @@ app.use(express.json());
 app.get("/api/v1/health", (req, res) => res.json({ status: "ok" }));
 
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/integrations", integrationRoutes);
 
 // The current frontend has no login screen, so login checks are OFF by default.
 // Set REQUIRE_AUTH=true in .env once the frontend sends a Bearer token.
