@@ -1,112 +1,74 @@
-
 const router = require("express").Router();
-const mongoose = require("mongoose");
 
 const Faculty = require("../models/faculty.model");
 const Department = require("../models/department.model");
-
-const {
-  verifyIntegrationToken
-} = require("../middleware/integration.middleware");
+const { verifyIntegrationToken } = require("../middleware/integration.middleware");
 
 router.use(verifyIntegrationToken);
 
-// GET all faculty
+// The API uses numeric ids (facultyId, department_id), not Mongo ObjectIds.
+const toId = (value) => {
+  const n = Number(value);
+  return Number.isInteger(n) && n > 0 ? n : null;
+};
+
+const fail = (res, status, message) => res.status(status).json({ success: false, message });
+
+// GET /api/v1/integrations/faculty            (?status=ACTIVE and ?department=Name are optional)
 router.get("/faculty", async (req, res) => {
   try {
-    const faculty = await Faculty.find()
-      .populate("department")
-      .sort({ fullName: 1 });
+    const filter = {};
+    if (req.query.status) filter.status = String(req.query.status).toUpperCase();
+    if (req.query.department) filter.department = String(req.query.department);
 
-    res.json({
-      success: true,
-      data: faculty
-    });
+    const faculty = await Faculty.find(filter).sort({ name: 1 });
+    res.json({ success: true, count: faculty.length, data: faculty });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Unable to retrieve faculty."
-    });
+    console.error("integration /faculty:", error);
+    fail(res, 500, "Unable to retrieve faculty.");
   }
 });
 
-// GET one faculty member
+// GET /api/v1/integrations/faculty/:id        (:id = facultyId, e.g. 1)
 router.get("/faculty/:id", async (req, res) => {
   try {
-    if (!mongoose.isValidObjectId(req.params.id)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid faculty ID."
-      });
-    }
+    const id = toId(req.params.id);
+    if (!id) return fail(res, 400, "Invalid faculty ID.");
 
-    const faculty = await Faculty.findById(req.params.id)
-      .populate("department");
+    const faculty = await Faculty.findOne({ facultyId: id });
+    if (!faculty) return fail(res, 404, "Faculty not found.");
 
-    if (!faculty) {
-      return res.status(404).json({
-        success: false,
-        message: "Faculty not found."
-      });
-    }
-
-    res.json({
-      success: true,
-      data: faculty
-    });
+    res.json({ success: true, data: faculty });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Unable to retrieve faculty."
-    });
+    console.error("integration /faculty/:id:", error);
+    fail(res, 500, "Unable to retrieve faculty.");
   }
 });
 
-// GET all departments
+// GET /api/v1/integrations/departments
 router.get("/departments", async (req, res) => {
   try {
-    const departments = await Department.find().sort({ name: 1 });
-
-    res.json({
-      success: true,
-      data: departments
-    });
+    const departments = await Department.find().sort({ department_name: 1 });
+    res.json({ success: true, count: departments.length, data: departments });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Unable to retrieve departments."
-    });
+    console.error("integration /departments:", error);
+    fail(res, 500, "Unable to retrieve departments.");
   }
 });
 
-// GET one department
+// GET /api/v1/integrations/departments/:id    (:id = department_id, e.g. 1)
 router.get("/departments/:id", async (req, res) => {
   try {
-    if (!mongoose.isValidObjectId(req.params.id)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid department ID."
-      });
-    }
+    const id = toId(req.params.id);
+    if (!id) return fail(res, 400, "Invalid department ID.");
 
-    const department = await Department.findById(req.params.id);
+    const department = await Department.findOne({ department_id: id });
+    if (!department) return fail(res, 404, "Department not found.");
 
-    if (!department) {
-      return res.status(404).json({
-        success: false,
-        message: "Department not found."
-      });
-    }
-
-    res.json({
-      success: true,
-      data: department
-    });
+    res.json({ success: true, data: department });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Unable to retrieve department."
-    });
+    console.error("integration /departments/:id:", error);
+    fail(res, 500, "Unable to retrieve department.");
   }
 });
 

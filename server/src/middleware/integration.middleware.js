@@ -1,28 +1,26 @@
-
 const crypto = require("crypto");
 
 exports.verifyIntegrationToken = (req, res, next) => {
-  const token = req.headers["x-api-key"];
-  const expectedToken = process.env.API_INTEGRATION_TOKEN;
+  const expected = process.env.API_INTEGRATION_TOKEN;
 
-  if (!expectedToken) {
+  if (!expected) {
     return res.status(500).json({
       success: false,
-      message: "Integration authentication is not configured."
+      message: "Integration authentication is not configured.",
     });
   }
 
-  if (
-    typeof token !== "string" ||
-    token.length !== expectedToken.length ||
-    !crypto.timingSafeEqual(
-      Buffer.from(token),
-      Buffer.from(expectedToken)
-    )
-  ) {
+  const sent = req.headers["x-api-key"];
+  const a = Buffer.from(typeof sent === "string" ? sent : "");
+  const b = Buffer.from(expected);
+
+  // Compare byte lengths (not string lengths) so timingSafeEqual can never throw.
+  const valid = typeof sent === "string" && a.length === b.length && crypto.timingSafeEqual(a, b);
+
+  if (!valid) {
     return res.status(401).json({
       success: false,
-      message: "Invalid API integration token."
+      message: "Invalid API integration token.",
     });
   }
 
